@@ -5,9 +5,17 @@ import Avatar from "../Avatar";
 import { useState, useCallback } from "react";
 import MenuItem from "./MenuItem";
 import useRegisterModal from "@/app/hooks/useRegisterModal";
+import useLoginModal from "@/app/hooks/useLoginModal";
+import { SafeUser } from "@/app/types";
+import { signOut } from "next-auth/react";
 
-const UserMenu = () => {
+interface UserMenuProps {
+  currentUser?: SafeUser | null;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
   const RegisterModal = useRegisterModal();
+  const loginModal = useLoginModal();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = useCallback(() => {
@@ -54,14 +62,13 @@ const UserMenu = () => {
         >
           <AiOutlineMenu />
           <div className="hidden md:block">
-            <Avatar />
+            <Avatar src={currentUser?.image} />
           </div>
         </div>
       </div>
 
-
       {isOpen && (
-        <div 
+        <div
           className="
             absolute 
             rounded-xl 
@@ -74,23 +81,24 @@ const UserMenu = () => {
             top-12 
             text-sm
           "
-          >
-            <div className= "flex flex-col cursor-pointer">
+        >
+          <div className="flex flex-col cursor-pointer">
+            {currentUser ? (
               <>
-              <MenuItem
-                  onClick={() => {}}
-                  label="Login"
-                  />
-                <MenuItem
-                  onClick={RegisterModal.onOpen}
-                  label="Sign Up"
-                  />
+                <MenuItem onClick={() => {}} label="My trip" />
+                <hr />
+                <MenuItem onClick={() => signOut()} label="logout" />
               </>
-
-            </div>
-    </div>
+            ) : (
+              <>
+                <MenuItem onClick={loginModal.onOpen} label="Login" />
+                <MenuItem onClick={RegisterModal.onOpen} label="Sign Up" />
+              </>
+            )}
+          </div>
+        </div>
       )}
-      </div>
+    </div>
   );
 };
 
